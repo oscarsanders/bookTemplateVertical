@@ -1,0 +1,162 @@
+%% chapters/02-writing-content.tex
+\chapter{Writing Content}\label{chap:writing-content}
+
+This chapter shows the building blocks you will use most often: headings,
+text, lists, callout boxes and theorem-like environments.
+
+\section{Headings}\label{sec:headings}
+
+The document is organised with the following commands, from largest to
+smallest: \cmd{chapter}, \cmd{section}, \cmd{subsection} and
+\cmd{subsubsection}. Chapters, sections and subsections are numbered and
+listed in the table of contents; deeper levels are not, unless you change the
+depth (see \cref{app:customization}).
+
+\subsection{A Subsection}
+
+Subsections group related paragraphs inside a section.
+
+\subsubsection{A Subsubsection}
+
+This level is not numbered by default. Use \cmd{paragraph} for a run-in
+heading at an even lower level.
+
+\section{Text and Emphasis}\label{sec:text}
+
+Use \cmd{emph} for emphasis and \cmd{textbf} for strong emphasis. Quotation
+marks should be typed with \cmd{enquote}, which follows the conventions of the
+document language: \enquote{a quotation with \enquote{a nested one}}. Insert a
+non-breaking space with a tilde, as in Figure~1, so that a label and its
+number are never split across lines. Footnotes appear at the bottom of the
+column.\footnote{Like this one.}
+
+\section{Lists}\label{sec:lists}
+
+Bulleted, numbered and description lists share the same compact style:
+
+\begin{itemize}
+  \item A bulleted item.
+  \item Another bulleted item.
+\end{itemize}
+
+\begin{enumerate}
+  \item A numbered item.
+  \item Another numbered item.
+\end{enumerate}
+
+\begin{description}
+  \item[Term] A short explanation of the term.
+  \item[Another term] A second explanation.
+\end{description}
+
+\section{Callout Boxes}\label{sec:callouts}
+
+Callout boxes draw attention to information that deserves to stand out. Three
+kinds are available.
+
+\begin{note}
+Use a \emph{note} for supplementary information the reader may find useful.
+\end{note}
+
+\begin{tip}
+Use a \emph{tip} for a recommendation or a shortcut.
+\end{tip}
+
+\begin{warning}
+Use a \emph{warning} for a pitfall that could cause errors or lost work.
+\end{warning}
+
+\noindent Each box is an environment named after its kind:
+
+\begin{lstlisting}[language={[LaTeX]TeX}]
+\begin{note}
+Your text here.
+\end{note}
+\end{lstlisting}
+
+\section{Definitions, Examples and Exercises}\label{sec:theorems}
+
+Four theorem-like environments are provided. They share one counter that
+restarts in every chapter, so \cref{def:template} is followed by
+\cref{ex:template} and \cref{thm:square}.
+
+\begin{definition}[Template]\label{def:template}
+A \emph{template} is a reusable document skeleton that fixes the layout and
+leaves the content to the author.
+\end{definition}
+
+\begin{example}\label{ex:template}
+This book is an example of a template: the design is fixed, and only the
+text, figures and references change from one book to the next.
+\end{example}
+
+\begin{theorem}\label{thm:square}
+For all real numbers $a$ and $b$, $(a+b)^2 = a^2 + 2ab + b^2$.
+\end{theorem}
+
+\begin{proof}
+Expand the product $(a+b)(a+b)$ and collect the terms.
+\end{proof}
+
+\begin{exercise}\label{ex:practice}
+Add a new chapter to this book (\cref{sec:adding-chapter}) and reference
+\cref{thm:square} from it.
+\end{exercise}
+
+\section{Columns and Margin Notes}\label{sec:layout}
+
+The book is typeset in a single column on portrait A4 pages. Two layout
+variations are optional:
+
+\begin{itemize}
+  \item \textbf{Two columns.} Add the \texttt{twocolumn} class option in
+        \file{main.tex} (the line is already there, commented out) and
+        preferably set \texttt{fontsize=10pt}. Nothing else has to change.
+  \item \textbf{Margin notes.} Pass the \texttt{marginnotes} option to the
+        style package (see \cref{app:customization}). The page then has a wide
+        outer margin where you can place short notes with \cmd{marginline}.
+\end{itemize}
+
+\begin{note}
+In two-column mode, wide material such as a large table or figure should use
+the starred environments, \texttt{table*} and \texttt{figure*}, which span both
+columns (see \cref{chap:figures}). In one-column mode they behave like the
+normal ones.
+\end{note}
+
+\section{Writing in Spanish}\label{sec:spanish}
+
+The book is written in English, but Spanish can be used anywhere without extra
+setup: type accents, \enquote{\~n} and inverted marks directly, since the
+files are UTF-8. Hyphenation, quotation marks and captions follow the active
+language. There are three ways to switch:
+
+\begin{lstlisting}[language={[LaTeX]TeX}]
+\selectlanguage{spanish}          % from here on, in Spanish
+\begin{otherlanguage}{spanish}    % a whole passage
+  ...
+\end{otherlanguage}
+El t\'ermino \es{canci\'on de cuna}  % a short phrase
+\end{lstlisting}
+
+A short phrase looks like this: \es{La programación es un arte, y también
+una ciencia.} A longer passage is set in its own environment, and the callout
+boxes translate their titles automatically:
+
+\begin{otherlanguage}{spanish}
+El diseño tipográfico de este libro respeta las reglas del español: la
+división de palabras, las comillas angulares como en
+\enquote{una cita dentro del texto} y los signos de apertura, como
+¿Qué opinas? o ¡Excelente!
+
+\begin{tip}
+Escribe el texto directamente con acentos y eñes; no hace falta usar
+comandos especiales.
+\end{tip}
+\end{otherlanguage}
+
+To write a whole chapter in Spanish, call \cmd{selectlanguage} with the
+argument \texttt{spanish} right after \cmd{chapter}, and with \texttt{english}
+at the end. Cross-references made with \cmd{cref} keep the English names
+(\enquote{section}, \enquote{figure}); inside Spanish text use \cmd{ref} and
+write the word by hand.

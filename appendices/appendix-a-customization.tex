@@ -1,0 +1,49 @@
+%% appendices/appendix-a-customization.tex
+\chapter{Customization Reference}\label{app:customization}
+
+\Cref{tab:customization} lists the settings you are most likely to change and
+where to find them. Options marked \emph{main} are in \file{main.tex};
+options marked \emph{style} are in \file{style/booktemplate.sty}.
+
+\begin{table*}[tb]
+  \centering
+  \caption{Common customizations.}
+  \label{tab:customization}
+  \begin{tabularx}{\textwidth}{@{}lllX@{}}
+    \toprule
+    Setting & File & Command or option & Notes \\
+    \midrule
+    Title, author, date & main  & \cmd{title}, \cmd{author}, \cmd{date} & \\
+    Header title        & main  & \cmd{runningtitle} & Use a short title. \\
+    Columns             & main  & \texttt{twocolumn} & Optional; one column by default. \\
+    Margin notes        & main  & \texttt{marginnotes} & Option of \pkg{booktemplate}. \\
+    Microtype           & main  & \texttt{microtype} & Option of \pkg{booktemplate}; slower. \\
+    Font size           & main  & \texttt{fontsize=11pt} & 10pt, 11pt or 12pt. \\
+    Chapter opening     & main  & \texttt{open=any} & Use \texttt{right} to start on right pages. \\
+    Numbering depth     & main  & \texttt{secnumdepth} & Also \texttt{tocdepth}. \\
+    Citation style      & main  & \texttt{authoryear} & Option of \pkg{booktemplate}. \\
+    Colours             & style & \texttt{accent} & Section~4 of the file. \\
+    Language            & style & \pkg{babel} & Section~2 of the file. \\
+    Fonts               & style & \pkg{lmodern} & Section~2 of the file. \\
+    Margins             & style & \pkg{geometry} & Section~3 of the file. \\
+    Code appearance     & style & \cmd{lstdefinestyle} & Section~9 of the file. \\
+    \bottomrule
+  \end{tabularx}
+\end{table*}
+
+\section{Changing the Page Format}
+
+The template is designed for portrait A4. To use US Letter, replace
+\texttt{paper=a4} by \texttt{paper=letter} in \file{main.tex}. To change the
+margins, adjust the values of \pkg{geometry} in the style file. Landscape is
+also possible: add \texttt{paper=landscape} to the class options and revise
+the margins.
+
+\section{Changing the Language}
+
+English is the main language and Spanish is also loaded (see
+\cref{sec:spanish}). To make Spanish the main language, change
+\texttt{main=english} to \texttt{main=spanish} in Section~2 of the style file.
+To add another language, load it in the same \pkg{babel} line and translate the
+captions of the callout boxes and the word \enquote{References} next to the
+existing \cmd{addto} lines.

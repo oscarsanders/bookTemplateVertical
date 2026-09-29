@@ -1,0 +1,160 @@
+%% chapters/03-figures-tables-code.tex
+\chapter{Figures, Tables and Code}\label{chap:figures}
+
+This chapter covers floating material (figures and tables), source code and
+mathematics.
+
+\section{Figures}\label{sec:figures}
+
+Put image files in the \file{figures/} folder. Vector PDF files are
+recommended because they stay sharp at any size and are small; PNG and JPG
+also work. Thanks to \cmd{graphicspath}, only the file name is needed:
+
+\begin{lstlisting}[language={[LaTeX]TeX}]
+\begin{figure}[tb]
+  \centering
+  \includegraphics[width=\linewidth]{sample-plot}
+  \caption{A short, descriptive caption.}
+  \label{fig:sample}
+\end{figure}
+\end{lstlisting}
+
+\begin{figure}[tb]
+  \centering
+  \includegraphics[width=\linewidth]{sample-plot}
+  \caption{A sample plot, included from \file{figures/sample-plot.pdf}. Its
+           \LaTeX{} source is kept in \file{figures/src/}.}
+  \label{fig:sample}
+\end{figure}
+
+\Cref{fig:sample} fits the text width. In the optional two-column layout, a
+figure that needs more room can span the full page width with the starred
+environment, as in \cref{fig:wide}; in one column it behaves like a normal
+figure.
+
+\begin{figure*}[tb]
+  \centering
+  \includegraphics[width=0.6\textwidth]{sample-plot}
+  \caption{The same plot in a \texttt{figure*} environment, which spans the
+           full page width (both columns in two-column mode).}
+  \label{fig:wide}
+\end{figure*}
+
+\section{Placing Figures Freely}\label{sec:free-figures}
+
+Ordinary floats go wherever \LaTeX{} finds room. The template also loads
+three packages for more control:
+
+\begin{itemize}
+  \item \pkg{wrapfig2} (or \pkg{wrapfig} when the former is not installed)
+        makes text flow around a figure or table with \texttt{wrapfigure} and
+        \texttt{wraptable}.
+  \item \pkg{float} adds the \texttt{[H]} specifier, which puts a figure
+        exactly where it appears in the source.
+  \item \pkg{placeins} provides \cmd{FloatBarrier}, which stops floats from
+        drifting past a given point (for example the end of a section).
+\end{itemize}
+
+A wrapped figure takes a side (\texttt{r}, \texttt{l}, or \texttt{i} and
+\texttt{o} for the inner and outer edge) and a width:
+
+\begin{lstlisting}[language={[LaTeX]TeX}]
+\begin{wrapfigure}{r}{0.42\linewidth}
+  \centering
+  \includegraphics[width=\linewidth]{sample-plot}
+  \caption{A wrapped figure.}
+\end{wrapfigure}
+Text that follows flows around the figure.
+\end{lstlisting}
+
+\begin{wrapfigure}{r}{0.42\linewidth}
+  \centering
+  \includegraphics[width=\linewidth]{sample-plot}
+  \caption{A figure wrapped by the text, using \texttt{wrapfigure}.}
+  \label{fig:wrapped}
+\end{wrapfigure}
+\Cref{fig:wrapped} sits on the right and the paragraph flows around it. Put
+the environment just before the paragraph that should wrap, and give the
+figure a width that leaves at least half of the line for the text. If the
+figure lands too close to the end of a page, move the environment a few lines
+up or down, or give the number of lines it occupies as an optional argument
+in square brackets before the side. Wrapped figures should not be placed
+inside lists, callout boxes or directly after a heading.
+\FloatBarrier
+
+Other packages cover more specialised needs, and can be added to
+\file{style/booktemplate.sty} when required: \pkg{wrapstuff} wraps text around
+non-rectangular shapes, \pkg{floatflt} is a lighter alternative to
+\pkg{wrapfig}, \pkg{subcaption} places several figures side by side, and
+\pkg{textpos} or a \pkg{tikz} overlay position an element at absolute
+coordinates on the page.
+
+\section{Tables}\label{sec:tables}
+
+Tables use the \pkg{booktabs} rules, which look better than full grids:
+horizontal lines only, and no vertical lines. The \texttt{X} column type of
+\pkg{tabularx} lets a column absorb the remaining width and wrap its text.
+
+\begin{table}[tb]
+  \centering
+  \caption{Environments provided by the template.}
+  \label{tab:environments}
+  \begin{tabularx}{\linewidth}{@{}lX@{}}
+    \toprule
+    Environment & Purpose \\
+    \midrule
+    \texttt{note}       & Supplementary information \\
+    \texttt{tip}        & Recommendations and shortcuts \\
+    \texttt{warning}    & Pitfalls and common mistakes \\
+    \texttt{definition} & Formal definitions, numbered per chapter \\
+    \texttt{example}    & Worked examples, numbered per chapter \\
+    \texttt{exercise}   & Exercises for the reader \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\Cref{tab:environments} lists the environments introduced in
+\cref{chap:writing-content}.
+
+\section{Source Code}\label{sec:code}
+
+Code is typeset with the \pkg{listings} package. Choose the language for each
+listing, and add a caption and a label to make it citable
+(\cref{lst:python}):
+
+\begin{lstlisting}[language=Python, caption={A short Python function.},
+                   label={lst:python}, numbers=left, xleftmargin=2.2em]
+def average(values):
+    """Return the arithmetic mean of a list of numbers."""
+    if not values:
+        raise ValueError("values must not be empty")
+    return sum(values) / len(values)
+
+print(average([2, 4, 6]))  # prints 4.0
+\end{lstlisting}
+
+For short fragments inside a sentence use \cmd{code}, as in
+\code|average(data)|, or \cmd{texttt} for plain monospaced text. To include
+a whole source file, use \cmd{lstinputlisting}.
+
+\begin{warning}
+The \cmd{code} command cannot be used inside the argument of another
+command, such as \cmd{section} or \cmd{footnote}. Use \cmd{texttt} there.
+\end{warning}
+
+\section{Mathematics}\label{sec:math}
+
+Inline mathematics is written between dollar signs, for example
+$a^2 + b^2 = c^2$. Numbered equations use the \texttt{equation} environment
+and can be referenced by their label, as in \cref{eq:quadratic}:
+
+\begin{equation}\label{eq:quadratic}
+  x = \frac{-b \pm \sqrt{b^{2} - 4ac}}{2a}
+\end{equation}
+
+Several aligned equations use \texttt{align}:
+
+\begin{align}
+  f(x)  &= x^2 + 1, \label{eq:f} \\
+  f'(x) &= 2x.      \label{eq:fprime}
+\end{align}

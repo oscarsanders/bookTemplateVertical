@@ -1,0 +1,299 @@
+%% ==========================================================================
+%%  style/booktemplate.sty -- Book Template
+%%  Version 1.1.0 (2026-09-29)
+%%
+%%  All layout, typography and package configuration lives here so that
+%%  main.tex only contains metadata and the document structure.
+%%
+%%  Requires the KOMA-Script class `scrbook' (loaded in main.tex).
+%%
+%%  Package options
+%%    numeric     numeric citations, e.g. [1, 2]          (default)
+%%    authoryear  author-year citations, e.g. (Knuth, 1984)
+%%    marginnotes one column with a wide outer margin for \marginline notes
+%%    microtype   load microtype (nicer spacing, but slower to compile)
+%%
+%%  Two columns: add `twocolumn' to the \documentclass options in main.tex.
+%%
+%%  Sections of this file
+%%    1. Options and sanity checks
+%%    2. Language and fonts
+%%    3. Page layout (portrait A4)
+%%    4. Colours
+%%    5. Headings, captions and lists
+%%    6. Running headers and footers
+%%    7. Tables, figures and mathematics
+%%    8. Callout boxes
+%%    9. Source code listings
+%%   10. Bibliography
+%%   11. Hyperlinks, cross-references and theorem-like environments
+%%   12. Small helper macros
+%% ==========================================================================
+\NeedsTeXFormat{LaTeX2e}[2020/10/01]
+\ProvidesPackage{style/booktemplate}[2026/09/29 v1.1.0 Book template]
+
+%% --------------------------------------------------------------------------
+%% 1. Options and sanity checks
+%% --------------------------------------------------------------------------
+\@ifclassloaded{scrbook}{}{%
+  \PackageError{booktemplate}%
+    {This package requires the scrbook document class}%
+    {Start main.tex with \string\documentclass{scrbook} (see the template).}%
+}
+\newif\if@bt@authoryear
+\DeclareOption{authoryear}{\@bt@authoryeartrue}
+\DeclareOption{numeric}{\@bt@authoryearfalse}
+\newif\if@bt@marginnotes
+\DeclareOption{marginnotes}{\@bt@marginnotestrue}
+\newif\if@bt@microtype
+\DeclareOption{microtype}{\@bt@microtypetrue}
+\ExecuteOptions{numeric}
+\ProcessOptions\relax
+
+%% --------------------------------------------------------------------------
+%% 2. Language and fonts
+%%    The document is written in English and Spanish can be used anywhere:
+%%      \selectlanguage{spanish}          switch (e.g. at the start of a chapter)
+%%      \begin{otherlanguage}{spanish}    a whole passage in Spanish
+%%      \es{texto}                        a short Spanish phrase inside English
+%%    Hyphenation, quotation marks, dates and captions follow the language.
+%%    Accents, \~n and inverted marks can be typed directly (UTF-8).
+%%
+%%    Font: the default LaTeX font (Computer Modern). Latin Modern (lmodern)
+%%    is the same design in the T1 encoding, which pdfLaTeX needs to
+%%    hyphenate accented words correctly and to keep the PDF in vector form.
+%% --------------------------------------------------------------------------
+\RequirePackage[T1]{fontenc}
+% English is the main language. Full TeX Live / Overleaf ship spanish.ldf; if it
+% is missing (minimal installs) Spanish is loaded from babel's locale data
+% instead, so the project still compiles (only Spanish hyphenation is lost).
+\IfFileExists{spanish.ldf}%
+  {\RequirePackage[spanish,main=english]{babel}}%
+  {\RequirePackage[english]{babel}\babelprovide[import]{spanish}}
+\RequirePackage{amsmath,amssymb}
+\IfFileExists{lmodern.sty}{\RequirePackage{lmodern}}{}
+\newcommand*{\es}[1]{\foreignlanguage{spanish}{#1}}
+\if@bt@microtype\RequirePackage{microtype}\fi
+% The default monospaced font is wide; let TeX stretch spaces a little more
+% instead of leaving inline code sticking out of the margin.
+\setlength{\emergencystretch}{3em}
+\RequirePackage{csquotes}             % \enquote{...} language-aware quotes
+
+%% --------------------------------------------------------------------------
+%% 3. Page layout (portrait A4)
+%%    The paper size is chosen in main.tex (paper=a4).
+%%    One column (default) : balanced margins. With the `marginnotes' package
+%%                           option the outer margin is wide enough for
+%%                           notes (\marginline{...}).
+%%    Two columns          : add the `twocolumn' class option in main.tex.
+%% --------------------------------------------------------------------------
+
+\if@twocolumn
+  \RequirePackage[%
+    inner=18mm, outer=18mm, top=24mm, bottom=22mm,%
+    headheight=16pt, headsep=7mm, footskip=10mm]{geometry}
+  \setlength{\columnsep}{8mm}
+  \setlength{\columnseprule}{0.3pt}
+\else
+  \if@bt@marginnotes
+    \RequirePackage[%
+      inner=25mm, textwidth=120mm, top=25mm, bottom=28mm,%
+      headheight=16pt, headsep=8mm, footskip=12mm,%
+      marginparwidth=40mm, marginparsep=6mm]{geometry}
+  \else
+    \RequirePackage[%
+      inner=30mm, outer=30mm, top=25mm, bottom=28mm,%
+      headheight=16pt, headsep=8mm, footskip=12mm]{geometry}
+  \fi
+\fi
+
+%% --------------------------------------------------------------------------
+%% 4. Colours
+%%    Change `accent' to re-colour headings, links, boxes and code rules.
+%% --------------------------------------------------------------------------
+\RequirePackage{xcolor}
+\definecolor{accent}{HTML}{1F4E79}      % main accent (deep blue)
+\definecolor{notecolor}{HTML}{1F4E79}   % note boxes
+\definecolor{tipcolor}{HTML}{2E7D32}    % tip boxes
+\definecolor{warningcolor}{HTML}{B45309}% warning boxes
+\colorlet{codebg}{black!4}              % code background
+\colorlet{codegray}{black!55}           % comments, line numbers, secondary text
+
+%% --------------------------------------------------------------------------
+%% 5. Headings, captions and lists
+%% --------------------------------------------------------------------------
+\setkomafont{disposition}{\sffamily\bfseries\color{accent}}
+\setkomafont{descriptionlabel}{\sffamily\bfseries}
+\setkomafont{chapterentry}{\sffamily\bfseries}
+
+\KOMAoptions{captions=tableheading}     % table captions above, figure below
+\addtokomafont{caption}{\small}
+\addtokomafont{captionlabel}{\sffamily\bfseries\color{accent}}
+
+\RequirePackage[shortlabels]{enumitem}
+\setlist{itemsep=0.15em, topsep=0.4em, parsep=0pt, leftmargin=1.6em}
+
+%% --------------------------------------------------------------------------
+%% 6. Running headers and footers
+%%    Inner header: \runningtitle (defaults to the book title).
+%%    Outer header: current chapter (left pages) or section (right pages).
+%%    Redefine \runningtitle in main.tex to use a shorter title, e.g.
+%%      \renewcommand*{\runningtitle}{Short Title}
+%% --------------------------------------------------------------------------
+% Metadata accessors for use in frontmatter/titlepage.tex
+\newcommand*{\thetitle}{\@title}
+\newcommand*{\thesubtitle}{\@subtitle}
+\newcommand*{\theauthor}{\@author}
+\newcommand*{\thedate}{\@date}
+\newcommand*{\thepublisher}{\@publishers}
+\newcommand*{\runningtitle}{\thetitle}
+\RequirePackage[headsepline]{scrlayer-scrpage}
+\pagestyle{scrheadings}
+\clearpairofpagestyles
+\automark[section]{chapter}
+\ihead{\runningtitle}
+\ohead{\headmark}
+\ofoot[\pagemark]{\pagemark}
+% With open=any, KOMA still forces right-hand pages at \frontmatter and
+% \mainmatter in two-sided documents. Skip those blank pages as well.
+\if@openright\else
+  \renewcommand*{\frontmatter}{\clearpage\@mainmatterfalse\pagenumbering{roman}}
+  \renewcommand*{\mainmatter}{\clearpage\@mainmattertrue\pagenumbering{arabic}}
+  \let\cleardoublepage\clearpage
+\fi
+\setkomafont{pageheadfoot}{\sffamily\footnotesize}
+\setkomafont{pagenumber}{\sffamily\footnotesize\bfseries}
+
+%% --------------------------------------------------------------------------
+%% 7. Tables, figures and mathematics
+%% --------------------------------------------------------------------------
+% `widepage': one-column page inside a two-column book (used for opening
+% pages). In a one-column book it simply starts a new page.
+\newenvironment{widepage}
+  {\if@twocolumn\@restonecoltrue\onecolumn\else\@restonecolfalse\newpage\fi}
+  {\clearpage\if@restonecol\twocolumn\fi}
+% multicol is only needed (and only loaded) in two-column mode, where the
+% contents page is typeset in two columns as well. multicol warns when the
+% class option `twocolumn' is active, so load it with an empty option list.
+\if@twocolumn
+  \let\bt@classopts\@classoptionslist
+  \let\@classoptionslist\@empty
+  \RequirePackage{multicol}
+  \let\@classoptionslist\bt@classopts
+  \BeforeStartingTOC[toc]{\begin{multicols}{2}}
+  \AfterStartingTOC[toc]{\end{multicols}}
+\fi
+\RequirePackage{graphicx}               % \includegraphics
+\RequirePackage{booktabs}               % professional table rules
+\RequirePackage{array,tabularx}         % flexible column types
+\graphicspath{{figures/}}               % \includegraphics{name} finds figures/name
+
+% Free figure placement.
+%   wrapfigure / wraptable : text flows around a figure or table (wrapfig2 is
+%                            the maintained fork of wrapfig; same syntax)
+%   [H] float specifier    : put a float exactly here (package float)
+%   \FloatBarrier          : stop floats from drifting past this point
+%                            (package placeins)
+\IfFileExists{wrapfig2.sty}{\RequirePackage{wrapfig2}}{\RequirePackage{wrapfig}}
+\RequirePackage{float}
+\RequirePackage{placeins}
+
+%% --------------------------------------------------------------------------
+%% 8. Callout boxes
+%% --------------------------------------------------------------------------
+\RequirePackage[breakable]{tcolorbox}
+\tcbset{%
+  btcallout/.style 2 args={%
+    breakable, sharp corners, boxrule=0pt, leftrule=2.5pt,%
+    colback=#1!7, colframe=#1,%
+    left=7pt, right=6pt, top=4pt, bottom=4pt,%
+    before skip=0.8\baselineskip, after skip=0.8\baselineskip,%
+    before upper={\setlength{\parindent}{0pt}\setlength{\parskip}{0.4\baselineskip}%
+      \textcolor{#1}{\sffamily\bfseries #2}\ }%
+  }%
+}
+% The box titles follow the active language.
+\addto\captionsenglish{\def\bt@notelabel{Note.}\def\bt@tiplabel{Tip.}%
+  \def\bt@warninglabel{Warning.}}
+\addto\captionsspanish{\def\bt@notelabel{Nota.}\def\bt@tiplabel{Consejo.}%
+  \def\bt@warninglabel{Advertencia.}}
+\newtcolorbox{note}{btcallout={notecolor}{\bt@notelabel}}
+\newtcolorbox{tip}{btcallout={tipcolor}{\bt@tiplabel}}
+\newtcolorbox{warning}{btcallout={warningcolor}{\bt@warninglabel}}
+
+%% --------------------------------------------------------------------------
+%% 9. Source code listings
+%%    Choose the language per listing: \begin{lstlisting}[language=Python].
+%% --------------------------------------------------------------------------
+\RequirePackage{scrhack}                % KOMA-Script compatibility layer for listings
+\RequirePackage{listings}
+\lstdefinestyle{booktemplate}{%
+  basicstyle=\ttfamily\small,
+  keywordstyle=\bfseries\color{accent},
+  commentstyle=\itshape\color{codegray},
+  stringstyle=\color{warningcolor},
+  backgroundcolor=\color{codebg},
+  frame=leftline, framerule=2pt, rulecolor=\color{accent},
+  framesep=6pt, xleftmargin=8pt, xrightmargin=0pt,
+  aboveskip=0.8\baselineskip, belowskip=0.6\baselineskip,
+  breaklines=true, breakatwhitespace=false, postbreak=\mbox{\textcolor{codegray}{$\hookrightarrow$}\space},
+  showstringspaces=false, keepspaces=true, tabsize=4, upquote=true,
+  captionpos=b, numbers=none, numberstyle=\tiny\color{codegray}, numbersep=8pt,
+  % accented letters and Spanish punctuation inside listings (UTF-8 input)
+  literate={á}{{\'a}}1 {é}{{\'e}}1 {í}{{\'i}}1 {ó}{{\'o}}1 {ú}{{\'u}}1
+           {Á}{{\'A}}1 {É}{{\'E}}1 {Í}{{\'I}}1 {Ó}{{\'O}}1 {Ú}{{\'U}}1
+           {ñ}{{\~n}}1 {Ñ}{{\~N}}1 {ü}{{\"u}}1 {Ü}{{\"U}}1
+           {¿}{{?`}}1 {¡}{{!`}}1
+}
+\lstset{style=booktemplate}
+
+%% --------------------------------------------------------------------------
+%% 10. Bibliography (natbib + BibTeX)
+%%     Sources go in references.bib; the style is plainnat.
+%% --------------------------------------------------------------------------
+\if@bt@authoryear
+  \RequirePackage[authoryear,round]{natbib}
+\else
+  \RequirePackage[numbers,square,sort&compress]{natbib}
+\fi
+\bibliographystyle{plainnat}
+\addto\captionsenglish{\renewcommand*{\bibname}{References}}
+\addto\captionsspanish{\renewcommand*{\bibname}{Referencias}}
+\setlength{\bibsep}{0.25em}
+
+%% --------------------------------------------------------------------------
+%% 11. Hyperlinks, cross-references and theorem-like environments
+%%     Load hyperref late; cleveref must come after hyperref.
+%% --------------------------------------------------------------------------
+\RequirePackage{url}
+\def\UrlBreaks{\do\/\do\-}          % break paths only at / and -
+\RequirePackage[colorlinks=true, linkcolor=accent, citecolor=accent,%
+  urlcolor=accent, bookmarksnumbered=true, pdfusetitle]{hyperref}
+\RequirePackage{amsthm}                % must be loaded before cleveref
+\RequirePackage[nameinlink,noabbrev]{cleveref}
+\crefname{lstlisting}{listing}{listings}
+\Crefname{lstlisting}{Listing}{Listings}
+
+% Theorem-like environments share one counter, numbered within chapters.
+% They are defined after cleveref so that \cref names each kind correctly.
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[chapter]
+\newtheorem{example}[definition]{Example}
+\newtheorem{exercise}[definition]{Exercise}
+\theoremstyle{plain}
+\newtheorem{theorem}[definition]{Theorem}
+
+%% --------------------------------------------------------------------------
+%% 12. Small helper macros
+%%     \cmd{section}     -> \section   (a LaTeX command name)
+%%     \file{main.tex}   -> main.tex   (file or path, may break across lines)
+%%     \pkg{natbib}      -> natbib     (a package name)
+%%     \code|x = 1|      -> x = 1       (inline code; any delimiter works)
+%% --------------------------------------------------------------------------
+\newcommand*{\cmd}[1]{\texttt{\textbackslash\detokenize{#1}}}
+\DeclareUrlCommand\bt@file{\urlstyle{tt}}
+\DeclareRobustCommand*{\file}{\bt@file}   % robust: safe in captions and headings
+\newcommand*{\pkg}[1]{\textsf{#1}}
+\newcommand*{\code}{\lstinline[breaklines=false]}
+
+\endinput
